@@ -15,7 +15,7 @@ describe Lita::Handlers::Queue, lita_handler: true do
     bob = Lita::User.create(1, mention_name: "bob")
     lilly = Lita::User.create(2, mention_name: "lilly")
     send_message("question for @lilly", as: bob)
-    expect(replies.last).to eq("<@1> is up for <@2>.")
+    expect(replies.last).to eq("<@1> is up for lilly.")
   end
 
   it "lets everyone know who's in the queue" do
@@ -24,7 +24,7 @@ describe Lita::Handlers::Queue, lita_handler: true do
     joe = Lita::User.create(3, mention_name: "joe")
     send_message("question for @lilly", as: bob)
     send_message("question for @lilly", as: joe)
-    expect(replies.last).to eq("<@1> is up for <@2>, and then joe")
+    expect(replies.last).to eq("<@1> is up for lilly, and then joe")
   end
 
   it "removes someone from the queue when they say nm" do
@@ -34,7 +34,7 @@ describe Lita::Handlers::Queue, lita_handler: true do
     send_message("question for @lilly", as: bob)
     send_message("question for @lilly", as: joe)
     send_message("nevermind @lilly", as: bob)
-    expect(replies.last).to eq("<@3> is up for <@2>.")
+    expect(replies.last).to eq("<@3> is up for lilly.")
   end
 
   it "gets next up person" do
@@ -44,6 +44,6 @@ describe Lita::Handlers::Queue, lita_handler: true do
     send_message("question for @lilly", as: bob)
     send_message("question @lilly", as: joe)
     send_message("next up", as: lilly)
-    expect(replies.last).to eq("<@2> the queue is empty!")
+    expect(replies.last).to eq("lilly the queue is empty!")
   end
 end

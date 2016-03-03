@@ -26,7 +26,7 @@ module Lita
         queue = queue_for(target.id)
         queue << msg.user.id
         persist_queue_for(target.id, queue)
-        send_queue_status(target, msg, queue)
+        annouce_to_room(target, msg, queue)
       end
 
       def remove_from_queue(msg)
@@ -34,7 +34,7 @@ module Lita
         queue = queue_for(target.id)
         queue.delete(msg.user.id)
         persist_queue_for(target, queue)
-        send_queue_status(target, msg, queue)
+        annouce_to_room(target, msg, queue)
       end
 
       def next(msg)
@@ -42,30 +42,31 @@ module Lita
         queue = queue_for(target)
         queue.shift
         persist_queue_for(target, queue)
-        send_queue_status(target, msg, queue)
-      end
-
-      def send_queue_status(responder, msg, queue)
-        case queue.size
-        when 0
-          msg.reply("#{slack_notifer responder.id} the queue is empty!")
-        when 1
-          msg.reply("#{slack_notifer queue[0]} is up for #{slack_notifer responder.id}.")
-        else
-          msg.reply("#{slack_notifer queue[0]} is up for #{slack_notifer responder.id}, and then #{queue[1..-1].map{|u| mention_name u}.join(", ")}")
-        end
-      end
-
-      def queue_for(target)
-        queue = redis.get(target)
-        queue ? JSON.parse(queue) : []
-      end
-
-      def persist_queue_for(target, queue)
-        redis.set target, queue.to_json
+        annouce_to_room(target, msg, queue)
       end
 
     private
+
+        def annouce_to_room(responder, msg, queue)
+          case queue.size
+          when 0
+            msg.reply("#{mention_name responder.id} the queue is empty!")
+          when 1
+            msg.reply("#{slack_notifer queue[0]} is up for #{mention_name responder.id}.")
+          else
+            msg.reply("#{slack_notifer queue[0]} is up for #{mention_name responder.id}, and then #{queue[1..-1].map{|u| mention_name u}.join(", ")}")
+          end
+        end
+
+        def queue_for(target)
+          queue = redis.get(target)
+          queue ? JSON.parse(queue) : []
+        end
+
+        def persist_queue_for(target, queue)
+          redis.set target, queue.to_json
+        end
+
         def slack_notifer(id, type: :user)
           char = type == :user ? '@' : "#"
           "<#{char}#{id}>"
