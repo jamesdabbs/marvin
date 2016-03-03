@@ -24,7 +24,7 @@ module Lita
       def add_to_queue(response)
         target = response.matches.first
         queue = queue_for(target)
-        queue << response.user.name
+        queue << response.user.mention_name
         persist_queue_for(target, queue)
         send_queue_status(response, queue)
       end
@@ -32,13 +32,13 @@ module Lita
       def remove_from_queue(response)
         target = response.matches.first
         queue = queue_for(target)
-        queue.delete(response.user.name)
+        queue.delete(response.user.mention_name)
         persist_queue_for(target, queue)
         send_queue_status(response, queue)
       end
 
       def next(response)
-        target = response.user.name
+        target = response.user.mention_name
         queue = queue_for(target)
         queue.shift
         persist_queue_for(target, queue)
