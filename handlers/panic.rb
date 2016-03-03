@@ -13,10 +13,13 @@ class PanicStore
     prompt_times = responses.values.map(&:keys).flatten.uniq.sort
 
     CSV.generate do |csv|
-      csv << ["user_id"] + prompt_times
+      csv << ["user_id"] + prompt_times.map do |t|
+        Time.at t.to_i
+      end
 
       responses.each do |id, response_map|
-        csv << [id] + prompt_times.map { |t| response_map[t] }
+        user = Lita::User.find_by_id id
+        csv << [user.name] + prompt_times.map { |t| response_map[t] }
       end
     end
   end
@@ -61,6 +64,10 @@ module Lita
     class Panic < Handler
       route /^\D*(\d)\D*$/, :answer
       route /how is every\w+ (in (\w+))?/, :poll
+
+      http.get "/panic" do |request, response|
+        response.body << PanicStore.to_csv(redis: redis)
+      end
 
       def poll response
         response.reply "I don't know. I'll ask them."
