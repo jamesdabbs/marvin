@@ -1,5 +1,11 @@
+begin
+  require "pry"
+rescue LoadError
+end
+
 %w(
   ask
+  panic
   scoreboard
 ).each { |mod| require_relative "./handlers/#{mod}" }
 
