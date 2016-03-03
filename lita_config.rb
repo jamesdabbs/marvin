@@ -6,6 +6,7 @@ end
 %w(
   ask
   panic
+  queue
   scoreboard
 ).each { |mod| require_relative "./handlers/#{mod}" }
 
