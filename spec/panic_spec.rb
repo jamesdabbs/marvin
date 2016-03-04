@@ -1,6 +1,6 @@
 require "spec_helper"
 require_relative "../handlers/panic"
-require 'pry'
+
 describe Lita::Handlers::Panic, lita_handler: true do
   let(:bob) { Lita::User.create(1, mention_name: "bob") }
   let(:lilly) { Lita::User.create(2, mention_name: "lilly") } # instructor

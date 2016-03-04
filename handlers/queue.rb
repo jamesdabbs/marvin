@@ -1,5 +1,3 @@
-require 'pry'
-
 class ResponderQueue
   attr_reader :responder, :redis
 
