@@ -35,8 +35,8 @@ class Lita::Adapters::Test
 end
 
 module Lita::RSpec::Handler
-  def replies_to target
-    replies.select { |r| r.to == target }
+  def replies_to user
+    replies.select { |r| r.to.user == user }
   end
 end
 

@@ -10,32 +10,41 @@ module Lita
         response.body << PanicStore.to_csv(redis: redis)
       end
 
-      def poll response
-        response.reply "I don't know. I'll ask them."
+      def poll msg
+        msg.reply "I don't know. I'll ask them."
 
-        channel = if name = response.matches[0][1]
+        channel = if name = msg.matches[0][1]
           Lita::Room.find_by_name name
         else
-          response.room
+          msg.room
         end
 
         responders = robot.roster channel
-        store_for(response.user).start_poll responders: responders
-        responders.each { |user| ping_with_poll user, response }
+        store.start_poll poster: msg.user, responders: responders
+        responders.each { |user| ping_with_poll user, msg }
       end
 
-      def answer response
-        store = store_for response.user
-        return unless store.open? # Assume this is a false positive match?
+      def answer msg
+        poll = store.poll_for msg.user
+        return unless poll # Assume this is a false positive match?
 
-        store.record response.message.body
-        response.reply_privately "Roger, thanks for the feedback"
+        poll.record user: msg.user, response: msg.message.body
+        msg.reply_privately "Roger, thanks for the feedback"
+
+        if poll.complete?
+          robot.send_message Source.new(user: poll.poster), "The results are in"
+        end
+
+        score = msg.matches[0][0].to_i
+        if score > 4
+          robot.send_message Source.new(user: poll.poster), "#{msg.user.mention_name} is at a #{score}"
+        end
       end
 
       private
 
-      def store_for user
-        PanicStore.new user: user, redis: redis
+      def store
+        @_store ||= PanicStore.new(redis)
       end
 
       def ping_with_poll user, response

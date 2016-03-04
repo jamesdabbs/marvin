@@ -31,7 +31,7 @@ describe Lita::Handlers::Panic, lita_handler: true do
 
       it "records feedback" do
         send_command("I'm okay. About a 4.", as: bob)
-        expect(replies.last).to eq "Roger, thanks for the feedback"
+        expect(replies_to(bob).last).to eq "Roger, thanks for the feedback"
       end
 
       it "does not respond to messages from public rooms" do
@@ -47,15 +47,13 @@ describe Lita::Handlers::Panic, lita_handler: true do
       describe "with a larger class" do
         let(:roster) { [lilly, bob, joe] }
 
-        pending "notifies the poller once everyone has responded" do
-          send_command("3", as: joe)
-          expect(replies_to lilly).to be_empty
-
-          send_command("2", as: bob)
-          expect(replies_to(lilly).last).to match /scores are in/i
+        it "notifies the poller once everyone has responded" do
+          expect { send_command("3", as: joe) }.not_to change { replies_to(lilly).count }
+          expect { send_command("2", as: bob) }.to change { replies_to(lilly).count }.by 1
+          expect(replies_to(lilly).last).to match /results are in/i
         end
 
-        pending "does notify the poller if anyone is panicked" do
+        it "does notify the poller if anyone is panicked" do
           send_command("6", as: joe)
           expect(replies_to(lilly).last).to match /joe is at a 6/
         end

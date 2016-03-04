@@ -24,44 +24,51 @@ class PanicStore
     end
   end
 
-  def initialize user:, redis:
-    @user, @redis = user, redis
-  end
-
-  def open! time
-    redis.setex open_key, expiration(time), time
-    redis.hset user.id, time, ""
-  end
-
-  def record response
-    open_at = redis.getset(open_key, "").to_s
-    redis.hset user.id, open_at, response unless open_at.empty?
-  end
-
-  def open?
-    !redis.get(open_key).to_s.empty?
-  end
-
-  def start_poll responders:
-    at = Time.now.to_i
-    responders.each do |user|
-      PanicStore.new(user: user, redis: redis).open! at
+  class Poll
+    def initialize key:, redis:
+      @key, @redis = key, redis
+      pref, @poster_id, @at = key.split ":"
+      raise "Invalid poll key: #{key}" unless pref == "poll"
     end
+
+    def poster
+      @_poster ||= Lita::User.find_by_id(poster_id)
+    end
+
+    def record user:, response:
+      redis.hset key, user.id, response
+    end
+
+    def complete?
+      missing = redis.hgetall(key).select { |id, response| response.empty? }
+      (missing.keys - [poster_id.to_s]).empty?
+    end
+
+    private
+
+    attr_reader :key, :redis, :poster_id
+  end
+
+  def initialize redis
+    @redis = redis
+  end
+
+  def start_poll poster:, responders:
+    start    = Time.now.to_f
+    finish   = start.to_i + 12 * 60 * 60
+    poll_key = "poll:#{poster.id}:#{start}"
+
+    args = [poll_key] + responders.map { |r| [r.id, ""] }.flatten
+    redis.hmset *args
+    responders.each { |r| redis.setex "open:#{r.id}", finish, poll_key }
+  end
+
+  def poll_for user
+    key = redis.get "open:#{user.id}"
+    Poll.new(key: key, redis: redis) if key
   end
 
   private
 
-  def open_key
-    "#{user.id}:open"
-  end
-
-  def expiration time
-    time + 12 * 60 * 60
-  end
-
-  def to_h
-    redis.hgetall user.id
-  end
-
-  attr_reader :user, :redis
+  attr_reader :redis
 end
