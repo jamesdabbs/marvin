@@ -3,8 +3,8 @@ require_relative "../lib/panic_store"
 module Lita
   module Handlers
     class Panic < Handler
-      route /^\D*(\d)\D*$/, :answer
-      route /how is every\w+ (in (\w+))?/, :poll
+      route /^\D*(\d)\D*$/, :answer, command: true
+      route /how(?: i|\')s every\w+\s*(in (\w+))?/i, :poll, command: true
 
       http.get "/panic" do |request, response|
         response.body << PanicStore.to_csv(redis: redis)
@@ -48,7 +48,6 @@ module Lita
 
       def take_temperature user, at:
         store_for(user).open! at
-        # TODO: don't message bots
         robot.send_message Source.new(user: user),
           "Hey, how are you doing (on a scale of 1 (boredom) to 6 (panic))?"
       end

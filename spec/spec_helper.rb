@@ -1,4 +1,8 @@
 require "lita/rspec"
+begin
+  require "pry"
+rescue LoadError
+end
 
 Lita.version_3_compatibility_mode = false
 
