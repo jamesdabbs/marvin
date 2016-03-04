@@ -44,6 +44,17 @@ describe Lita::Handlers::Queue, lita_handler: true do
     send_message("question for @lilly", as: bob)
     send_message("question @lilly", as: joe)
     send_message("next up", as: lilly)
+    expect(replies.last).to eq("<@3> is up for lilly.")
+  end
+
+  it "notifies the responder when queue is clear" do
+    bob = Lita::User.create(1, mention_name: "bob")
+    lilly = Lita::User.create(2, mention_name: "lilly")
+    joe = Lita::User.create(3, mention_name: "joe")
+    send_message("question for @lilly", as: bob)
+    send_message("question @lilly", as: joe)
+    send_message("next up", as: lilly)
+    send_message("next up", as: lilly)
     expect(replies.last).to eq("lilly the queue is empty!")
   end
 end

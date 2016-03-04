@@ -1,5 +1,50 @@
 require 'json'
 
+class ResponderQueue
+  attr_reader :responder, :redis
+
+  def initialize(for_user, redis)
+    @responder = for_user
+    @redis = redis
+  end
+
+  def add(user)
+    save(queue << user.id)
+    self
+  end
+
+  def remove(user)
+    new_q = queue
+    new_q.delete(user.id)
+    save(new_q)
+    self
+  end
+
+  def next
+    new_q = queue.dup
+    new_q.shift
+    save(new_q)
+    self
+  end
+
+  def queue
+    q = redis.get(responder.id)
+    q ? JSON.parse(q) : []
+  end
+
+  class << self
+    def for(user, redis)
+      self.new(user, redis)
+    end
+  end
+
+  private
+    def save(new_queue)
+      redis.set responder.id, new_queue.to_json
+    end
+end
+
+
 module Lita
   module Handlers
     class Queue < Handler
@@ -22,27 +67,24 @@ module Lita
       )
 
       def add_to_queue(msg)
-        target = Lita::User.find_by_mention_name msg.matches[0][0]
-        queue = queue_for(target.id)
-        queue << msg.user.id
-        persist_queue_for(target.id, queue)
-        annouce_to_room(target, msg, queue)
+        responder = Lita::User.find_by_mention_name msg.matches[0][0]
+        queue = ResponderQueue.for(responder, redis).add msg.user
+
+        annouce_to_room(responder, msg, queue.queue)
       end
 
       def remove_from_queue(msg)
-        target = Lita::User.find_by_mention_name msg.matches[0][0]
-        queue = queue_for(target.id)
-        queue.delete(msg.user.id)
-        persist_queue_for(target, queue)
-        annouce_to_room(target, msg, queue)
+        responder = Lita::User.find_by_mention_name msg.matches[0][0]
+        queue = ResponderQueue.for(responder, redis).remove(msg.user)
+
+        annouce_to_room(responder, msg, queue.queue)
       end
 
       def next(msg)
-        target = Lita::User.find_by_id msg.user.id
-        queue = queue_for(target)
-        queue.shift
-        persist_queue_for(target, queue)
-        annouce_to_room(target, msg, queue)
+        responder = Lita::User.find_by_id msg.user.id
+        queue = ResponderQueue.for(responder, redis).next
+        
+        annouce_to_room(responder, msg, queue.queue)
       end
 
     private
@@ -56,15 +98,6 @@ module Lita
           else
             msg.reply("#{slack_notifer queue[0]} is up for #{mention_name responder.id}, and then #{queue[1..-1].map{|u| mention_name u}.join(", ")}")
           end
-        end
-
-        def queue_for(target)
-          queue = redis.get(target)
-          queue ? JSON.parse(queue) : []
-        end
-
-        def persist_queue_for(target, queue)
-          redis.set target, queue.to_json
         end
 
         def slack_notifer(id, type: :user)
