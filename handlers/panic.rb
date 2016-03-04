@@ -79,8 +79,15 @@ module Lita
         end
 
         ts = Time.now.to_i
-        robot.roster(channel).each do |user|
-          take_temperature User.find_by_id(user), at: ts
+        robot.roster(channel).each do |user_id|
+          user = User.find_by_id(user_id)
+          begin
+            take_temperature user, at: ts
+          rescue RuntimeError => e
+            unless e.message =~ /cannot_dm_bot/
+              response.reply_privately("Shoot, I couldn't reach #{user.mention_name} because we hit this bug `#{e.message}`")
+            end
+          end
         end
       end
 
