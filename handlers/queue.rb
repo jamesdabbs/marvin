@@ -1,4 +1,4 @@
-require 'json'
+require 'pry'
 
 class ResponderQueue
   attr_reader :responder, :redis
@@ -9,27 +9,22 @@ class ResponderQueue
   end
 
   def add(user)
-    save(queue << user.id)
+    redis.rpush responder.id, user.id
     self
   end
 
   def remove(user)
-    new_q = queue
-    new_q.delete(user.id)
-    save(new_q)
+    redis.lrem responder.id, 0 , user.id
     self
   end
 
   def next
-    new_q = queue.dup
-    new_q.shift
-    save(new_q)
+    redis.lpop responder.id
     self
   end
 
   def queue
-    q = redis.get(responder.id)
-    q ? JSON.parse(q) : []
+    redis.lrange(responder.id, 0, -1)
   end
 
   class << self
@@ -37,11 +32,6 @@ class ResponderQueue
       self.new(user, redis)
     end
   end
-
-  private
-    def save(new_queue)
-      redis.set responder.id, new_queue.to_json
-    end
 end
 
 
@@ -83,7 +73,7 @@ module Lita
       def next(msg)
         responder = Lita::User.find_by_id msg.user.id
         queue = ResponderQueue.for(responder, redis).next
-        
+
         annouce_to_room(responder, msg, queue.queue)
       end
 
