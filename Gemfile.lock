@@ -1,7 +1,7 @@
 GIT
-  remote: git://github.com/jamesdabbs/lita-slack.git
-  revision: 03c32998e1066bff2f9bbe44a4b4797647ce855e
-  ref: 03c3299
+  remote: git://github.com/litaio/lita-slack.git
+  revision: 38a968fd88e46fb5448420296b6415ecfe946a46
+  ref: 38a968f
   specs:
     lita-slack (1.7.2)
       eventmachine

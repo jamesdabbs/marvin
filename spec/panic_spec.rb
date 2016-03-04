@@ -2,9 +2,13 @@ require "spec_helper"
 require_relative "../handlers/panic"
 
 describe Lita::Handlers::Panic, lita_handler: true do
-  let!(:bob) { Lita::User.create(1, mention_name: "bob") }
-  let!(:lilly) { Lita::User.create(2, mention_name: "lilly") } # instructor
-  let!(:joe) { Lita::User.create(3, mention_name: "joe") }
+  user = ->(id, name) do
+    Lita::User.create id, mention_name: name, name: name.capitalize
+  end
+
+  let!(:bob) { user.(1, "bob") }
+  let!(:lilly) { user.(2, "lilly") }
+  let!(:joe) { user.(3, "joe") }
 
   it { should route_command("how is everyone doing?").to(:poll) }
   it { should route_command("how's everybody?").to(:poll) }
@@ -12,7 +16,7 @@ describe Lita::Handlers::Panic, lita_handler: true do
   it { should route_command("Today was awful. Definitely a 6.").to(:answer) }
 
   describe "#poll" do
-    let(:roster) { [lilly, bob] }
+    let(:roster) { [lilly, bob].map &:id }
 
     before do
       allow(robot).to receive(:roster).and_return(roster)
@@ -45,7 +49,7 @@ describe Lita::Handlers::Panic, lita_handler: true do
       end
 
       describe "with a larger class" do
-        let(:roster) { [lilly, bob, joe] }
+        let(:roster) { [lilly, bob, joe].map &:id }
 
         it "notifies the poller once everyone has responded" do
           expect { send_command("3", as: joe) }.not_to change { replies_to(lilly).count }
@@ -55,7 +59,7 @@ describe Lita::Handlers::Panic, lita_handler: true do
 
         it "does notify the poller if anyone is panicked" do
           send_command("6", as: joe)
-          expect(replies_to(lilly).last).to match /joe is at a 6/
+          expect(replies_to(lilly).last).to match /Joe is at a 6/
         end
       end
     end
