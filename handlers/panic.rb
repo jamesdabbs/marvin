@@ -19,17 +19,9 @@ module Lita
           response.room
         end
 
-        ts = Time.now.to_i
-        robot.roster(channel).each do |user_id|
-          user = User.find_by_id(user_id)
-          begin
-            take_temperature user, at: ts
-          rescue RuntimeError => e
-            unless e.message =~ /cannot_dm_bot/
-              response.reply_privately("Shoot, I couldn't reach #{user.mention_name} because we hit this bug `#{e.message}`")
-            end
-          end
-        end
+        responders = robot.roster channel
+        store_for(response.user).start_poll responders: responders
+        responders.each { |user| ping_with_poll user, response }
       end
 
       def answer response
@@ -37,7 +29,7 @@ module Lita
         return unless store.open? # Assume this is a false positive match?
 
         store.record response.message.body
-        response.reply "Roger, thanks for the feedback"
+        response.reply_privately "Roger, thanks for the feedback"
       end
 
       private
@@ -46,10 +38,13 @@ module Lita
         PanicStore.new user: user, redis: redis
       end
 
-      def take_temperature user, at:
-        store_for(user).open! at
+      def ping_with_poll user, response
         robot.send_message Source.new(user: user),
           "Hey, how are you doing (on a scale of 1 (boredom) to 6 (panic))?"
+      rescue RuntimeError => e
+        unless e.message =~ /cannot_dm_bot/
+          response.reply_privately("Shoot, I couldn't reach #{user.mention_name} because we hit this bug `#{e.message}`")
+        end
       end
     end
 

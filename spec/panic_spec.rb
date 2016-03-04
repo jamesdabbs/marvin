@@ -12,8 +12,10 @@ describe Lita::Handlers::Panic, lita_handler: true do
   it { should route_command("Today was awful. Definitely a 6.").to(:answer) }
 
   describe "#poll" do
+    let(:roster) { [lilly, bob] }
+
     before do
-      allow(robot).to receive(:roster).and_return([1,2])
+      allow(robot).to receive(:roster).and_return(roster)
     end
 
     describe "with an active poll" do
@@ -32,31 +34,48 @@ describe Lita::Handlers::Panic, lita_handler: true do
         expect(replies.last).to eq "Roger, thanks for the feedback"
       end
 
-      it "does not record messages from public rooms" do
+      it "does not respond to messages from public rooms" do
         expect do
           send_message("Here's a PR for marvin issue 4", as: bob, from: Lita::Room.create_or_update("#lita.io"))
         end.not_to change { replies.count }
       end
 
-      it "does not record feedback from users which aren't in the room" do
+      it "does not respond to users which aren't in the room" do
         expect { send_command("2", as: joe) }.not_to change { replies.count }
+      end
+
+      describe "with a larger class" do
+        let(:roster) { [lilly, bob, joe] }
+
+        pending "notifies the poller once everyone has responded" do
+          send_command("3", as: joe)
+          expect(replies_to lilly).to be_empty
+
+          send_command("2", as: bob)
+          expect(replies_to(lilly).last).to match /scores are in/i
+        end
+
+        pending "does notify the poller if anyone is panicked" do
+          send_command("6", as: joe)
+          expect(replies_to(lilly).last).to match /joe is at a 6/
+        end
       end
     end
 
     describe "error handling" do
       it "will silence cannot_dm_bot errors" do
-        expect_any_instance_of(described_class).to receive(:take_temperature).twice.and_raise("Slack API call to im.open returned an error: cannot_dm_bot.")
+        allow(robot).to receive(:send_message).twice.and_raise("Slack API call to im.open returned an error: cannot_dm_bot.")
         send_command("how is everyone doing?", as: lilly, from: Lita::Room.create_or_update("#lita.io"))
         expect(replies.size).to eq 1
         expect(replies.first).to eq "I don't know. I'll ask them."
       end
 
       it "will respond with other errors" do
-        expect_any_instance_of(described_class).to receive(:take_temperature).twice.and_raise("BOOM")
+        allow(robot).to receive(:send_message).twice.and_raise("BOOM")
         send_command("how is everyone doing?", as: lilly, from: Lita::Room.create_or_update("#lita.io"))
         expect(replies.size).to eq 3
         expect(replies.first).to eq "I don't know. I'll ask them."
-        expect(replies.last).to eq "Shoot, I couldn't reach lilly because we hit this bug `BOOM`"
+        expect(replies.last).to match /Shoot, I couldn't reach \w+ because we hit this bug `BOOM`/
       end
     end
   end

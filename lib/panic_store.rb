@@ -42,8 +42,11 @@ class PanicStore
     !redis.get(open_key).to_s.empty?
   end
 
-  def to_h
-    redis.hgetall user.id
+  def start_poll responders:
+    at = Time.now.to_i
+    responders.each do |user|
+      PanicStore.new(user: user, redis: redis).open! at
+    end
   end
 
   private
@@ -54,6 +57,10 @@ class PanicStore
 
   def expiration time
     time + 12 * 60 * 60
+  end
+
+  def to_h
+    redis.hgetall user.id
   end
 
   attr_reader :user, :redis
