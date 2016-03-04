@@ -56,37 +56,37 @@ module Lita
         help: { "next up" => "removes oldest user from queue and ping group" }
       )
 
-      def add_to_queue(msg)
-        responder = Lita::User.find_by_mention_name msg.matches[0][0]
-        queue = ResponderQueue.for(responder, redis).add msg.user
+      def add_to_queue(source)
+        responder = Lita::User.find_by_mention_name source.matches[0][0]
+        queue = ResponderQueue.for(responder, redis).add source.user
 
-        annouce_to_room(responder, msg, queue.queue)
+        annouce_to_room(responder, source, queue.queue)
       end
 
-      def remove_from_queue(msg)
-        responder = Lita::User.find_by_mention_name msg.matches[0][0]
-        queue = ResponderQueue.for(responder, redis).remove(msg.user)
+      def remove_from_queue(source)
+        responder = Lita::User.find_by_mention_name source.matches[0][0]
+        queue = ResponderQueue.for(responder, redis).remove(source.user)
 
-        annouce_to_room(responder, msg, queue.queue)
+        annouce_to_room(responder, source, queue.queue)
       end
 
-      def next(msg)
-        responder = Lita::User.find_by_id msg.user.id
+      def next(source)
+        responder = Lita::User.find_by_id source.user.id
         queue = ResponderQueue.for(responder, redis).next
 
-        annouce_to_room(responder, msg, queue.queue)
+        annouce_to_room(responder, source, queue.queue)
       end
 
     private
 
-        def annouce_to_room(responder, msg, queue)
+        def annouce_to_room(responder, source, queue)
           case queue.size
           when 0
-            msg.reply("#{mention_name responder.id} the queue is empty!")
+            source.reply("#{mention_name responder.id} the queue is empty!")
           when 1
-            msg.reply("#{slack_notifer queue[0]} is up for #{mention_name responder.id}.")
+            source.reply("#{slack_notifer queue[0]} is up for #{mention_name responder.id}.")
           else
-            msg.reply("#{slack_notifer queue[0]} is up for #{mention_name responder.id}, and then #{queue[1..-1].map{|u| mention_name u}.join(", ")}")
+            source.reply("#{slack_notifer queue[0]} is up for #{mention_name responder.id}, and then #{queue[1..-1].map{|u| mention_name u}.join(", ")}")
           end
         end
 
