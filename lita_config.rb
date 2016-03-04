@@ -12,7 +12,7 @@ end
 
 Lita.configure do |config|
   # The name your robot will use.
-  config.robot.name = "DC Bot"
+  config.robot.name = "Marvin"
 
   # The locale code for the language to use.
   # config.robot.locale = :en
@@ -45,5 +45,4 @@ Lita.configure do |config|
 
   ## Example: Set configuration for any loaded handlers. See the handler's
   ## documentation for options.
-
 end
