@@ -6,6 +6,8 @@ begin
 rescue LoadError
 end
 
+require_relative "./extensions/bot_filter"
+
 %w(
   ask
   panic
@@ -22,7 +24,7 @@ Lita.configure do |config|
 
   config.adapters.slack.token    = ENV.fetch("SLACK_TOKEN")
   config.robot.admins            = ENV.fetch("ADMINS").split(",")
-  config.redis.url               = ENV.fetch("REDISTOGO_URL")
+  config.redis[:url]             = ENV.fetch("REDISTOGO_URL")
   config.http.port               = ENV.fetch("PORT", 3999)
   config.handlers.panic.hostname = ENV.fetch("URL", "http://localhost:#{config.http.port}")
 

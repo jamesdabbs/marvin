@@ -49,8 +49,6 @@ module Lita
 
 
       def answer msg
-        return if msg.user.mention_name == robot.mention_name
-
         poll = PanicDB::Poll.for user: msg.user, redis: redis
         return unless poll # Assume this is a false positive match?
 
