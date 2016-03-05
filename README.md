@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/jamesdabbs/lita-test-adapter.png?branch=master)](https://travis-ci.org/jamesdabbs/marvin)
-[![Coverage Status](https://coveralls.io/repos/jamesdabbs/lita-test-adapter/badge.png)](https://coveralls.io/r/jamesdabbs/marvin)
+[![Build Status](https://travis-ci.org/jamesdabbs/marvin.svg?branch=master)](https://travis-ci.org/jamesdabbs/marvin)
+[![Coverage Status](https://coveralls.io/repos/github/jamesdabbs/marvin/badge.svg?branch=master)](https://coveralls.io/github/jamesdabbs/marvin?branch=master)
 
 # Setup
 

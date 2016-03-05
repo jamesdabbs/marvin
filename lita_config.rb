@@ -30,8 +30,9 @@ Lita.configure do |config|
     require "rollbar"
     Rollbar.configure do |config|
       config.access_token = token
-      config.endpoint     = ENV["ROLLBAR_ENDPOINT"]
     end
-    config.robot.error_handler = ->(e) { Rollbar.error e }
+    config.robot.error_handler = ->(e) do
+      Rollbar.error e
+    end
   end
 end
