@@ -1,4 +1,6 @@
+require "rack/test"
 require "lita/rspec"
+
 begin
   require "pry"
 rescue LoadError

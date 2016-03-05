@@ -2,12 +2,12 @@ require_relative "../lib/panic_store"
 
 module Lita
   module Handlers
-    class Panic < Handler
+    class PanicHandler < Handler
       route /^\D*(\d)\D*$/, :answer, command: true
       route /how(?: i|\')s every\w+\s*(in \#([\w-]+))?/i, :poll, command: true
 
       http.get "/panic" do |request, response|
-        response.body << PanicStore.to_csv(redis: redis)
+        response.body << Panic.to_csv(redis: redis)
       end
 
       def poll msg
@@ -20,12 +20,12 @@ module Lita
         end
 
         responders = robot.roster(channel).map { |user_id| Lita::User.find_by_id user_id }
-        store.start_poll poster: msg.user, responders: responders
+        Panic::Poll.create poster: msg.user, responders: responders, redis: redis
         responders.each { |user| ping_with_poll user, msg }
       end
 
       def answer msg
-        poll = store.poll_for msg.user
+        poll = Panic::Poll.for user: msg.user, redis: redis
         return unless poll # Assume this is a false positive match?
 
         poll.record user: msg.user, response: msg.message.body
@@ -45,10 +45,6 @@ module Lita
 
       private
 
-      def store
-        @_store ||= PanicStore.new(redis)
-      end
-
       def ping_with_poll user, response
         return if user.mention_name == robot.mention_name
 
@@ -61,6 +57,6 @@ module Lita
       end
     end
 
-    Lita.register_handler Panic
+    Lita.register_handler PanicHandler
   end
 end
