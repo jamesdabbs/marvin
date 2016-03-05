@@ -95,12 +95,4 @@ class PanicDB
 
     attr_reader :key, :redis, :poster_id, :at
   end
-
-  def initialize redis
-    @redis = redis
-  end
-
-  private
-
-  attr_reader :redis
 end

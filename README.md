@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/jamesdabbs/lita-test-adapter.png?branch=master)](https://travis-ci.org/jamesdabbs/marvin)
+[![Coverage Status](https://coveralls.io/repos/jamesdabbs/lita-test-adapter/badge.png)](https://coveralls.io/r/jamesdabbs/marvin)
+
 # Setup
 
 * Clone it

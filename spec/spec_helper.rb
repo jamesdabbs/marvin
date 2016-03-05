@@ -1,3 +1,11 @@
+require "simplecov"
+require "coveralls"
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new [
+  SimpleCov::Formatter::HTMLFormatter,
+  Coveralls::SimpleCov::Formatter
+]
+SimpleCov.start { add_filter "/spec/" }
+
 require "rack/test"
 require "lita/rspec"
 
@@ -6,51 +14,8 @@ begin
 rescue LoadError
 end
 
-class TestMessage < SimpleDelegator
-  attr_reader :to, :body
-
-  def initialize to:, body:
-    @to, @body = to, body.clone.freeze
-    super body
-  end
-
-  def inspect
-    %|<Message("#{body}", to: #{to.user ? to.user.name : to.room.name})>|
-  end
-
-  def == other
-    case other
-    when String
-      body == other
-    when TestMessage
-      to == other.to && body == other.body
-    else
-      raise "Can't compare #{self.class} with #{other.class}"
-    end
-  end
-end
-
-class Lita::Adapters::Test
-  def send_messages _target, strings
-    sent_messages.concat strings.map { |s| TestMessage.new to: _target, body: s }
-  end
-end
-
-module Lita::RSpec::Handler
-  def build_user name, groups: []
-    @_user_id ||= 0
-    @_user_id  += 1
-
-    Lita::User.create(@_user_id, mention_name: name, name: name.capitalize).tap do |u|
-      groups.each { |g| robot.auth.add_user_to_group! u, g }
-    end
-  end
-
-  def replies_to user
-    replies.select { |r| r.to.user == user }
-  end
-end
-
+require_relative "./support/factories"
+require_relative "./support/replies"
 
 Lita.version_3_compatibility_mode = false
 
