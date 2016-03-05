@@ -1,14 +1,37 @@
-require_relative "../lib/panic_store"
+require_relative "../lib/panic_db"
 
 module Lita
   module Handlers
-    class PanicHandler < Handler
-      route /^\D*(\d)\D*$/, :answer, command: true
-      route /how(?: i|\')s every\w+\s*(in \#([\w-]+))?/i, :poll, command: true
+    class Panic < Handler
+      config :hostname, type: String, required: false
 
-      http.get "/panic" do |request, response|
-        response.body << Panic.to_csv(redis: redis)
+      route \
+        /how(?: i|\')s every\w+\s*(in \#([\w-]+))?/i,
+        :poll,
+        command: true,
+        restrict_to: [:instructors],
+        help: { "how's everyone (in #room)?" => "start a new panic poll" }
+      route \
+        /^\D*(?<score>\d)\D*$/,
+        :answer,
+        command: true
+      route \
+        /panic export/,
+        :export,
+        command: true,
+        restrict_to: [:instructors, :staff],
+        help: { "panic export" => "get a CSV dump of panic scores" }
+
+      http.get "/panic/:token" do |request, response|
+        token = request.env["router.params"][:token]
+        user  = PanicDB.user_from_token token, redis: redis
+        if user
+          response.body << PanicDB.to_csv(redis: redis)
+        else
+          response.status = 403
+        end
       end
+
 
       def poll msg
         msg.reply "I don't know. I'll ask them."
@@ -20,12 +43,15 @@ module Lita
         end
 
         responders = robot.roster(channel).map { |user_id| Lita::User.find_by_id user_id }
-        Panic::Poll.create poster: msg.user, responders: responders, redis: redis
+        PanicDB::Poll.create poster: msg.user, responders: responders, redis: redis
         responders.each { |user| ping_with_poll user, msg }
       end
 
+
       def answer msg
-        poll = Panic::Poll.for user: msg.user, redis: redis
+        return if msg.user.mention_name == robot.mention_name
+
+        poll = PanicDB::Poll.for user: msg.user, redis: redis
         return unless poll # Assume this is a false positive match?
 
         poll.record user: msg.user, response: msg.message.body
@@ -35,13 +61,20 @@ module Lita
           robot.send_message Source.new(user: poll.poster), "The results are in"
         end
 
-        score = msg.matches[0][0].to_i
+        score = msg.match_data[:score].to_i
         if score > 4
           username = msg.user.name || msg.user.mention_name
           robot.send_message Source.new(user: poll.poster),
             "FYI: #{username} is at a #{score}"
         end
       end
+
+
+      def export msg
+        token = PanicDB.export_token_for(msg.user, redis: redis)
+        msg.reply_privately "#{config.hostname}/panic/#{token}"
+      end
+
 
       private
 
@@ -57,6 +90,6 @@ module Lita
       end
     end
 
-    Lita.register_handler PanicHandler
+    Lita.register_handler Panic
   end
 end

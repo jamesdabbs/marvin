@@ -6,6 +6,7 @@ module Lita
       route /score (\S+)/, :score, help: { "score TEXT" => "Show points" }
 
       def plus response
+        return if response.user.mention_name == robot.mention_name
         key    = response.matches[0][0]
         score  = Integer(redis.get key) || 0
         score += 1
@@ -14,6 +15,7 @@ module Lita
       end
 
       def minus response
+        return if response.user.mention_name == robot.mention_name
         key    = response.matches[0][0]
         score  = Integer(redis.get key) || 0
         score -= 1
@@ -22,6 +24,7 @@ module Lita
       end
 
       def score response
+        return if response.user.mention_name == robot.mention_name
         key   = response.matches[0][0]
         score = redis.get(key) || 0
         response.reply "#{key} has #{score} points"

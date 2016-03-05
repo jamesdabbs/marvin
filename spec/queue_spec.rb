@@ -2,16 +2,10 @@ require "spec_helper"
 require_relative "../handlers/queue"
 
 describe Lita::Handlers::Queue, lita_handler: true do
-  let(:bob) { Lita::User.create(1, mention_name: "bob") }
-  let(:lilly) { Lita::User.create(2, mention_name: "lilly") } # instructor
-  let(:joe) { Lita::User.create(3, mention_name: "joe") }
+  let!(:bob)   { build_user "bob" }
+  let!(:lilly) { build_user "lilly", groups: [:instructors, :staff] }
+  let!(:joe)   { build_user "joe" }
 
-  before do
-    bob
-    lilly
-    joe
-  end
-  
   it { is_expected.to route("question @russell").to(:add_to_queue) }
   it { is_expected.to route("question  for @russell") }
   it { is_expected.to_not route("question   #russell") }
@@ -19,7 +13,7 @@ describe Lita::Handlers::Queue, lita_handler: true do
   it { is_expected.to route("nevermind @russell") }
   it { is_expected.to_not route("nm   #russell") }
 
-  it { is_expected.to route("next up") }
+  it { is_expected.to route("next up").with_authorization_for(:instructors) }
 
   it "lets everyone know who's in the queue when one user is waiting" do
     send_message("question for @lilly", as: bob)

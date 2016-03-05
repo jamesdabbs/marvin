@@ -18,6 +18,7 @@ module Lita
       route(
         /next up/,
         :next,
+        restrict_to: [:instructors],
         help: { "next up" => "removes oldest user from queue and ping group" }
       )
 

@@ -1,19 +1,16 @@
 require "spec_helper"
 require_relative "../handlers/panic"
 
-describe Lita::Handlers::PanicHandler, lita_handler: true do
-  user = ->(id, name) do
-    Lita::User.create id, mention_name: name, name: name.capitalize
-  end
+describe Lita::Handlers::Panic, lita_handler: true do
+  let!(:bob)   { build_user "bob" }
+  let!(:lilly) { build_user "lilly", groups: [:instructors, :staff] }
+  let!(:joe)   { build_user "joe" }
 
-  let!(:bob) { user.(1, "bob") }
-  let!(:lilly) { user.(2, "lilly") }
-  let!(:joe) { user.(3, "joe") }
-
-  it { should route_command("how is everyone doing?").to(:poll) }
-  it { should route_command("how's everybody?").to(:poll) }
+  it { should route_command("how is everyone doing?").with_authorization_for(:instructors).to(:poll) }
+  it { should route_command("how's everybody in #channel?").with_authorization_for(:instructors).to(:poll) }
   it { should route_command("1").to(:answer) }
   it { should route_command("Today was awful. Definitely a 6.").to(:answer) }
+  it { should_not route_command("This is a response with no numbers") }
 
   describe "#poll" do
     let(:roster) { [lilly, bob].map &:id }
@@ -63,14 +60,26 @@ describe Lita::Handlers::PanicHandler, lita_handler: true do
         end
 
         it "produces a CSV" do
-          send_command("3", as: joe)
-          send_command("2", as: bob)
+          send_command "3", as: joe
+          send_command "2", as: bob
 
-          csv = http.get("/panic").body
+          send_command "panic export", as: lilly
+          token = replies_to(lilly).last.match(/panic\/(\S+)/)[1]
+
+          csv = http.get("/panic/#{token}").body
 
           joe_row = CSV.parse(csv, headers: true).find { |r| r["User"] == joe.name }
           last_response = joe_row.to_a.pop.pop
           expect(last_response).to eq "3"
+        end
+
+        it "protects CSV access with tokens" do
+          send_command "panic export", as: lilly
+          token = replies_to(lilly).last.match(/panic\/(\S+)/)[1]
+
+          response = http.get "/panic/#{token}-miss"
+          expect(response.status).to eq 403
+          expect(response.body).to be_empty
         end
       end
     end
