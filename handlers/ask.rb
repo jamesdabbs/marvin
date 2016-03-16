@@ -1,7 +1,7 @@
 module Lita
   module Handlers
     class Ask < Handler
-      route /ask (\#?\@?\w+) (.*)/, :ask,
+      route /^ask (\#?\@?\w+) (.*)/, :ask,
         help: { "ask (user|channel) (text)" => "Privately forwards a question" }
 
       def ask response
