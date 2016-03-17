@@ -3,6 +3,7 @@ ruby   "2.3.0"
 
 gem "lita"
 gem "lita-howdoi"
+gem "lita-panic", github: "jamesdabbs/lita-panic"
 
 # This commit is on master; this should be safe to bump when the
 # next version releases with support for `roster`
