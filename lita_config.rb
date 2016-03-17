@@ -10,7 +10,6 @@ require_relative "./extensions/bot_filter"
 
 %w(
   ask
-  panic
   queue
   scoreboard
 ).each { |mod| require_relative "./handlers/#{mod}" }
