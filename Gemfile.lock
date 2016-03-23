@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/jamesdabbs/lita-panic.git
-  revision: 8a720443bb34019106e08c6777a7de1174450851
+  revision: 29b2fb3e4bc4a812d62f19644f8c50c261b12665
   specs:
     lita-panic (0.1.0)
       lita (>= 4.7)
@@ -67,7 +67,7 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    puma (3.0.2)
+    puma (3.2.0)
     rack (1.6.4)
     rack-test (0.6.3)
       rack (>= 1.0)
