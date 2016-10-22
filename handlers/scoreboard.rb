@@ -7,7 +7,7 @@ module Lita
 
       def plus response
         key    = response.matches[0][0]
-        score  = Integer(redis.get key) || 0
+        score  = redis.get(key).to_i
         score += 1
         redis.set key, score
         response.reply "#{key} now has #{score} points"
@@ -15,7 +15,7 @@ module Lita
 
       def minus response
         key    = response.matches[0][0]
-        score  = Integer(redis.get key) || 0
+        score  = redis.get(key).to_i
         score -= 1
         redis.set key, score
         response.reply "#{key} now has #{score} points"
