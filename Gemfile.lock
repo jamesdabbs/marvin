@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/jamesdabbs/lita-panic.git
-  revision: f7ba97c2720e4f977f5a4436cd5ef3764bfd16fb
+  revision: d9e55da63e773f1e4a1013d92ba5d4187620d4b6
   specs:
     lita-panic (0.1.0)
       lita (>= 4.7)
