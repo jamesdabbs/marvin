@@ -1,11 +1,4 @@
 GIT
-  remote: git://github.com/jamesdabbs/lita-panic.git
-  revision: d9e55da63e773f1e4a1013d92ba5d4187620d4b6
-  specs:
-    lita-panic (0.1.0)
-      lita (>= 4.7)
-
-GIT
   remote: git://github.com/rposborne/lita-slack.git
   revision: 4ab89d0e2f89e27dc7f2c2a0cd4fc59d1ae6057e
   specs:
@@ -15,6 +8,12 @@ GIT
       faye-websocket (>= 0.8.0)
       lita (>= 4.7.0)
       multi_json
+
+PATH
+  remote: /Users/rposborne/code/lita-panic
+  specs:
+    lita-panic (0.1.0)
+      lita (>= 4.7)
 
 GEM
   remote: https://rubygems.org/
