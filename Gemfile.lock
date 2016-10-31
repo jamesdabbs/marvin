@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/jamesdabbs/lita-panic.git
-  revision: 0f05f4afee588aa17ab2b7c2a09bb8e67479ec4b
+  revision: a251fa443c6551d581532f631262f33a777e815b
   specs:
     lita-panic (0.1.0)
       lita (>= 4.7)
@@ -125,4 +125,4 @@ RUBY VERSION
    ruby 2.3.1p112
 
 BUNDLED WITH
-   1.12.5
+   1.13.6
