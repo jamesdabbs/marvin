@@ -8,10 +8,15 @@ end
 
 require_relative "./extensions/bot_filter"
 
+Slack.configure do |config|
+  config.token = ENV['SLACK_TOKEN']
+end
+
 %w(
   ask
   queue
   scoreboard
+  presence
 ).each { |mod| require_relative "./handlers/#{mod}" }
 
 Lita.configure do |config|
