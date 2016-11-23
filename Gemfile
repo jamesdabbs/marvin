@@ -7,7 +7,7 @@ gem "lita-panic", github: "jamesdabbs/lita-panic"
 
 # This commit is on master; this should be safe to bump when the
 # next version releases with support for `roster`
-gem "lita-slack", github: "rpsosborne/lita-slack", branch: "always-trigger-event"
+gem "lita-slack", github: "rposborne/lita-slack", branch: "always-trigger-event"
 gem "dotenv"
 gem "slack-ruby-client"
 

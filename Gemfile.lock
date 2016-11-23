@@ -6,8 +6,10 @@ GIT
       concurrent-ruby
       lita (>= 4.7)
 
-PATH
-  remote: /Users/rposborne/code/lita-slack
+GIT
+  remote: git://github.com/rposborne/lita-slack.git
+  revision: bfea193d1247bda61b7f68e6e0b77b5faefb9c7d
+  branch: always-trigger-event
   specs:
     lita-slack (1.8.0)
       eventmachine
@@ -145,7 +147,7 @@ DEPENDENCIES
   slack-ruby-client
 
 RUBY VERSION
-   ruby 2.3.1p112
+   ruby 2.3.3p222
 
 BUNDLED WITH
    1.13.6
