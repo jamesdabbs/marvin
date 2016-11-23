@@ -11,6 +11,12 @@ module Lita
       def post_event(data)
         uri = URI(ENV["WHITETOWER_URL"])
         http = Net::HTTP.new(uri.host, uri.port)
+
+        if ENV["WHITETOWER_URL"].starts_with? "https://"
+          http.use_ssl = true
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        end
+
         req = Net::HTTP::Post.new(
           uri.path,
           "Content-Type" => "application/json",
