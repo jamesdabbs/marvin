@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/jamesdabbs/lita-panic.git
-  revision: 646d6709d3e698e70dfb66c3547bac54f822db04
+  revision: 908eafc8e50f0fd8e7ed654622b9eca6bed9a49c
   specs:
     lita-panic (0.1.0)
       concurrent-ruby
