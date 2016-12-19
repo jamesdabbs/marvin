@@ -1,13 +1,13 @@
 GIT
-  remote: git://github.com/jamesdabbs/lita-panic.git
-  revision: fb78c30e0152ee00b67e5c09148608dce0af0bbb
+  remote: https://github.com/jamesdabbs/lita-panic.git
+  revision: 324d7fb1cd36559124f0c1a15ae6067fcd9a2177
   specs:
     lita-panic (0.1.0)
       concurrent-ruby
       lita (>= 4.7)
 
 GIT
-  remote: git://github.com/rposborne/lita-slack.git
+  remote: https://github.com/rposborne/lita-slack.git
   revision: bfea193d1247bda61b7f68e6e0b77b5faefb9c7d
   branch: always-trigger-event
   specs:
@@ -27,7 +27,7 @@ GEM
       minitest (~> 5.1)
       tzinfo (~> 1.1)
     coderay (1.1.1)
-    concurrent-ruby (1.0.2)
+    concurrent-ruby (1.0.3)
     coveralls (0.8.17)
       json (>= 1.8, < 3)
       simplecov (~> 0.12.0)
