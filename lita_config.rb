@@ -16,6 +16,7 @@ end
   ask
   queue
   scoreboard
+  meetup
   presence
 ).each { |mod| require_relative "./handlers/#{mod}" }
 
@@ -31,7 +32,7 @@ Lita.configure do |config|
   config.redis[:url]             = ENV.fetch("REDISTOGO_URL")
   config.http.port               = ENV.fetch("PORT", 3999)
   config.handlers.panic.hostname = ENV.fetch("URL", "http://localhost:#{config.http.port}")
-
+  config.handlers.meetup.hostname = ENV.fetch("URL", "http://localhost:#{config.http.port}")
   if token = ENV["ROLLBAR_ACCESS_TOKEN"]
     require "rollbar"
     Rollbar.configure do |config|

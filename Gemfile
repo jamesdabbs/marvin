@@ -12,6 +12,10 @@ gem "lita-panic", github: "jamesdabbs/lita-panic"
 gem "lita-slack", github: "rposborne/lita-slack", branch: "always-trigger-event"
 gem "dotenv"
 gem "slack-ruby-client"
+gem "httparty"
+gem "zip"
+gem "simple_xlsx_writer"
+
 
 group :development do
   gem "pry"
