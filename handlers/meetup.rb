@@ -6,25 +6,25 @@ module Lita
     class Meetup < Handler
       config :hostname, type: String, required: false
 
-      route /meetup tonight/, :get_tonights_meetup,
-            help: { "meetup tonight" => "Get a link to tonights meetup at the stored venue" }
+      route /meetup next/, :get_next_meetup,
+            help: { "meetup next" => "Get a link to nexts meetup at the stored venue" }
 
       route /meetup set venue (\d+)/, :store_venue,
-            help: { "meetup set venue 123" => "Set the default venue for getting tonights meetup" }
+            help: { "meetup set venue 123" => "Set the default venue for getting nexts meetup" }
 
       route /meetup rsvps (https?:\/\/[\S]+)/, :get_rsvps_for_meetup_url,
             help: { "meetup rsvps https://www.meetup.com/dcruby/events/235551669/" => "Get an rsvp list for the linked meetup" }
 
       http.get "/meetup/venue/:venue_id" do |request, response|
         venue_id = request.env["router.params"][:venue_id]
-        response.header['Content-Type'] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        response.header["Content-Type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         response.write ::Meetup::Event.new(::Meetup::Venue.new(venue_id).next_event).as_excel
       end
 
       http.get "/meetup/event/:group/:event_id" do |request, response|
         group = request.env["router.params"][:group]
         id = request.env["router.params"][:event_id]
-        response.header['Content-Type']= "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        response.header["Content-Type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         response.write ::Meetup::Event.by_id(group, id).as_excel
       end
 
@@ -41,7 +41,7 @@ module Lita
         msg.reply_privately "#{config.hostname}/meetup/event/#{group_name}/#{event_id}"
       end
 
-      def get_tonights_meetup(msg)
+      def get_next_meetup(msg)
         if default_venue
           msg.reply_privately "#{config.hostname}/meetup/venue/#{default_venue}"
         else
