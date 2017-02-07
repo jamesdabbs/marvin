@@ -17,14 +17,14 @@ module Lita
 
       http.get "/meetup/venue/:venue_id" do |request, response|
         venue_id = request.env["router.params"][:venue_id]
-        response.header[:content_type] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        response.header['Content-Type'] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         response.write ::Meetup::Event.new(::Meetup::Venue.new(venue_id).next_event).as_excel
       end
 
       http.get "/meetup/event/:group/:event_id" do |request, response|
         group = request.env["router.params"][:group]
         id = request.env["router.params"][:event_id]
-        response.header[:content_type] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        response.header['Content-Type']= "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         response.write ::Meetup::Event.by_id(group, id).as_excel
       end
 
